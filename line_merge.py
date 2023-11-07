@@ -22,6 +22,7 @@ def process_lines(image_src):
 
     lines = cv2.HoughLinesP(edges, rho=1, theta=np.pi/180, threshold=50,
                             minLineLength=50, maxLineGap=30)
+
     # l[0] - line; l[1] - angle
     for line in get_lines(lines):
         leftx, boty, rightx, topy = line
@@ -66,7 +67,7 @@ def process_lines(image_src):
     merged_lines_all = []
     merged_lines_all.extend(merged_lines_x)
     merged_lines_all.extend(merged_lines_y)
-    # merged_lines_all.extend(merged_lines_yx)
+    merged_lines_all.extend(merged_lines_yx)
     merged_lines_all.extend(merged_lines_xy)
     print("process groups lines", len(_lines), len(merged_lines_all))
     img_merged_lines = cv2.imread(image_src)
@@ -258,8 +259,6 @@ def pixel_radius(path):
             cv2.circle(img, (a, b), r, (0, 255, 0), 2)
         # Draw a small circle (of radius 1) to show the center.
             cv2.circle(img, (a, b), 1, (0, 0, 255), 3)
-            cv2.imshow("Detected Circle", img)
-            cv2.waitKey(0)
             if a < width/3 and b < height/3:
                 return r
 
@@ -273,29 +272,30 @@ def length_of_each_edge(ratio, lines):
     return length
 
 
-path = "D:/program files/qq.jpg"
+paths = ["D:/program files/q.png", "D:/program files/qq.jpg",
+         "D:/program files/111.jpg", "D:/program files/222.jpg"]
+for file in paths:
+    lines = process_lines(file)
+    print(lines)
+    real_coin_size = 1.25
 
-lines = process_lines(path)
-print(lines)
-real_coin_size = 1.25
-
-pixel_coin_size = pixel_radius(path)
-print(pixel_coin_size)
-print(real_coin_size/pixel_coin_size)
-length = length_of_each_edge(real_coin_size/pixel_coin_size, lines)
-count = 0
-img = cv2.imread(path)
-img = cv2.resize(img, (0, 0), fx=0.5, fy=0.5)
-for line in lines:
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    org = (int((line[0][0]+line[1][0])/2)+5, int((line[0][1]+line[1][1])/2)+5)
-    fontScale = .75
-    color = (0, 255, 0)
-    thickness = 1
-    img = cv2.putText(img, str(round(length[count], 2)), org, font,
-                      fontScale, color, thickness, cv2.LINE_AA)
-    count += 1
+    pixel_coin_size = pixel_radius(file)
+    print(pixel_coin_size)
+    print(real_coin_size/pixel_coin_size)
+    length = length_of_each_edge(real_coin_size/pixel_coin_size, lines)
+    count = 0
+    img = cv2.imread(file)
+    img = cv2.resize(img, (0, 0), fx=0.5, fy=0.5)
+    for line in lines:
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        org = (int((line[0][0]+line[1][0])/2), int((line[0][1]+line[1][1])/2))
+        fontScale = 1
+        color = (0, 0, 255)
+        thickness = 1
+        img = cv2.putText(img, str(round(length[count], 2))+"cm", org, font,
+                          fontScale, color, thickness, cv2.LINE_AA)
+        count += 1
 
 # Displaying the image
-cv2.imshow("output", img)
-cv2.waitKey(0)
+    cv2.imshow("output", img)
+    cv2.waitKey(0)
